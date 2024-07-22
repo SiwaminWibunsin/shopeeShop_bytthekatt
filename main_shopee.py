@@ -19,27 +19,27 @@ def start_bot():
     # Let user open the browser and login manually, then use the session
     if browser_choice == "Chrome":
         options = webdriver.ChromeOptions()
-        options.add_argument("user-data-dir=C:/Users/User/AppData/Local/Google/Chrome/User Data")
+        user_data_dir = os.path.join(os.getenv("LOCALAPPDATA"), "Google", "Chrome", "User Data")
+        options.add_argument(f"user-data-dir={user_data_dir}")
         driver = webdriver.Chrome(options=options)
     elif browser_choice == "Edge":
         options = webdriver.EdgeOptions()
-        options.add_argument("user-data-dir=C:/Users/User/AppData/Local/Microsoft/Edge/User Data")
+        user_data_dir = os.path.join(os.getenv("LOCALAPPDATA"), "Microsoft", "Edge", "User Data")
+        options.add_argument(f"user-data-dir={user_data_dir}")
         driver = webdriver.Edge(options=options)
     else:
         options = webdriver.ChromeOptions()
-        options.add_argument("user-data-dir=C:/Users/User/AppData/Local/Google/Chrome/User Data")
+        user_data_dir = os.path.join(os.getenv("LOCALAPPDATA"), "Google", "Chrome", "User Data")
+        options.add_argument(f"user-data-dir={user_data_dir}")
         driver = webdriver.Chrome(options=options)  # Default to Chrome if none selected
 
     driver.get('https://shopee.co.th')
 
-    # Wait for user to log in manually and press Enter to continue
     input("Please log in manually and press Enter here after logging in and completing CAPTCHA...")
 
     driver.get(product_url)
     
-    # Check product availability and add to cart
     if check_product_availability(driver, product_url):
-        # Go to cart and proceed to checkout
         proceed_to_checkout(driver, quantity, payment_method)
     else:
         print("Product not available.")
@@ -47,7 +47,6 @@ def start_bot():
 def check_product_availability(driver, product_url):
     try:
         driver.get(product_url)
-        # Logic to check product availability
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "btn-buy"))
         )
@@ -58,12 +57,11 @@ def check_product_availability(driver, product_url):
 
 def proceed_to_checkout(driver, quantity, payment_method):
     try:
-        # Logic to add product to cart and proceed to checkout
         print("Proceeding to checkout...")
+        # Add your logic to proceed to checkout here
     except Exception as e:
         print(f"Checkout failed: {e}")
 
-# GUI
 root = tk.Tk()
 root.title("Shopee Bot")
 root.geometry("350x250")
