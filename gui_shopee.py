@@ -1,50 +1,42 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk
+from bot_shopee import login_shopee, check_product_availability, add_to_cart, select_payment_method, confirm_purchase
+from selenium import webdriver
 
 def start_bot():
-    try:
-        username = username_entry.get()
-        password = password_entry.get()
-        product_url = url_entry.get()
-        quantity = int(quantity_entry.get())
-        card_number = card_number_entry.get()
-        expiry_date = expiry_date_entry.get()
-        cvv = cvv_entry.get()
-        
-        # เรียกใช้ฟังก์ชันหลักเพื่อเริ่มต้นบอท
-        from bot_shopee import run_bot
-        run_bot(username, password, product_url, quantity, card_number, expiry_date, cvv)
-        messagebox.showinfo("Success", "Bot has successfully completed the task!")
-    except Exception as e:
-        messagebox.showerror("Error", str(e))
+    username = username_entry.get()
+    password = password_entry.get()
+    product_url = product_url_entry.get()
+    payment_method = payment_method_combobox.get()
 
-app = tk.Tk()
-app.title("Shopee Bot")
+    driver = webdriver.Chrome()
+    if login_shopee(username, password, driver):
+        if check_product_availability(product_url, driver):
+            if add_to_cart(driver):
+                if select_payment_method(driver, payment_method):
+                    confirm_purchase(driver)
+    driver.quit()
 
-tk.Label(app, text="Username").grid(row=0)
-tk.Label(app, text="Password").grid(row=1)
-tk.Label(app, text="Product URL").grid(row=2)
-tk.Label(app, text="Quantity").grid(row=3)
-tk.Label(app, text="Card Number").grid(row=4)
-tk.Label(app, text="Expiry Date").grid(row=5)
-tk.Label(app, text="CVV").grid(row=6)
+root = tk.Tk()
+root.title("Shopee Bot")
 
-username_entry = tk.Entry(app)
-password_entry = tk.Entry(app, show="*")
-url_entry = tk.Entry(app)
-quantity_entry = tk.Entry(app)
-card_number_entry = tk.Entry(app)
-expiry_date_entry = tk.Entry(app)
-cvv_entry = tk.Entry(app)
-
+tk.Label(root, text="Shopee Username:").grid(row=0, column=0)
+username_entry = tk.Entry(root)
 username_entry.grid(row=0, column=1)
+
+tk.Label(root, text="Shopee Password:").grid(row=1, column=0)
+password_entry = tk.Entry(root, show="*")
 password_entry.grid(row=1, column=1)
-url_entry.grid(row=2, column=1)
-quantity_entry.grid(row=3, column=1)
-card_number_entry.grid(row=4, column=1)
-expiry_date_entry.grid(row=5, column=1)
-cvv_entry.grid(row=6, column=1)
 
-tk.Button(app, text='Start Bot', command=start_bot).grid(row=7, column=1, pady=4)
+tk.Label(root, text="Product URL:").grid(row=2, column=0)
+product_url_entry = tk.Entry(root)
+product_url_entry.grid(row=2, column=1)
 
-app.mainloop()
+tk.Label(root, text="Payment Method:").grid(row=3, column=0)
+payment_method_combobox = ttk.Combobox(root, values=["ShopeePay", "CreditCard", "BankTransfer"])
+payment_method_combobox.grid(row=3, column=1)
+
+start_button = tk.Button(root, text="Start Bot", command=start_bot)
+start_button.grid(row=4, column=0, columnspan=2)
+
+root.mainloop()
